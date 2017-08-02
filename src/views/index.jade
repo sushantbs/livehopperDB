@@ -1,0 +1,166 @@
+extends layout
+
+block content
+  h3 GrassHopper Data Management UI.
+  div(id="app-container")
+    div(class="row-element create-entities")
+      div(class="create-user-block")
+        h4 Add User
+        div
+          label Name
+          input(type="text" id="add-user-name")
+        div
+          label Age
+          input(type="text" id="add-user-age")
+        div
+          label Email
+          input(type="text" id="add-user-email")
+        div
+          input(type="button" value="Add User" id="add-user-click")
+
+      div(class="create-host-block")
+        h4 Add Host
+        div
+          label Name
+          input(type="text" id="add-host-name")
+        div
+          label Email
+          input(type="text" id="add-host-email")
+        div
+          label City
+          input(type="text" id="add-host-city")
+        div
+          label Phone
+          input(type="text" id="add-host-phone")
+        div
+          input(type="button" value="Add Host" id="add-host-click")
+
+      div(class="create-event-block")
+        h4 Add Event
+        div
+          label Name
+          input(type="text" id="add-event-name")
+        div
+          label Date
+          input(type="date" id="add-event-date")
+        div
+          label Time
+          input(type="time" id="add-event-time")
+        div
+          label Host
+          select(id="event-host-list")
+        div
+          input(type="button" value="Add Event" id="add-event-click")
+
+      div(class="create-place-block" style="display: none;")
+        h4 Add Place
+        div
+          label Name
+          input(type="text" id="add-place-name")
+        div
+          label Lat,Long
+          input(type="text" id="add-place-latlong")
+        div
+          label Timings
+          input(type="text" id="add-place-timings")
+        div
+          input(type="button" value="Add Place" id="add-place-click")
+
+      div(class="create-artist-block")
+        h4 Add Artist
+        div
+          label Name
+          input(type="text" id="add-artist-name")
+        div
+          label Age
+          input(type="text" id="add-artist-age")
+        div
+          label Genre
+          input(type="text" id="add-artist-genre")
+        div
+          input(type="button" value="Add Artist" id="add-artist-click")
+
+    div(class="row-element entity-lists")
+      div(class="user-list-section")
+        h4 All Users
+        div(id="user-list-container")
+
+      div(class="event-list-section")
+        h4 All Events
+        div(id="event-list-container")
+
+      div(class="host-list-section")
+        h4 All Hosts
+        div(id="host-list-container")
+
+      div(class="artist-list-section")
+        h4 All Artists
+        div(id="artist-list-container")
+
+    div(class="row-element create-relations")
+      div(class="create-attending-relation")
+        h4 User likes Host
+        div
+          label Users
+          select(id="user-likes-host")
+        div
+          label Hosts
+          select(id="host-likes")
+        div
+          input(type="button" value="Like" id="add-user-host-like-relation")
+
+      div(class="create-attending-relation")
+        h4 User likes Artist
+        div
+          label Users
+          select(id="user-likes-artist")
+        div
+          label Artist
+          select(id="artist-likes")
+        div
+          input(type="button" value="Like" id="add-user-artist-like-relation")
+
+      div(class="create-attending-relation")
+        h4 User attends Event
+        div
+          label Users
+          select(id="users-attend")
+        div
+          label Events
+          select(id="events-attend")
+        div
+          input(type="button" value="Add Attending" id="add-attending-relation")
+
+      div(class="create-performing-relation")
+        h4 Artist performs at Event
+        div
+          label Artists
+          select(id="artists-perform")
+        div
+          label Events
+          select(id="events-perform")
+        div
+          input(type="button" value="Add Performing" id="add-performing-relation")
+
+    h4 View artist linked to user via event user is attending
+    div(class="row-element show-linked-artists")
+      div
+        label Users
+        select(id="users-links")
+        input(type="button" value="Show Linked Artists" id="show-linked-artists")
+
+      div(id="linked-artists-results")
+
+    h4 View User Feed
+    div(class="row-element show-linked-artists")
+      div
+        label Users
+        select(id="users-feed")
+        input(type="button" value="Show Feed" id="show-user-feed")
+
+      div(id="user-feed-results")
+
+    div(id="toaster" class="toaster")
+
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" type="text/javascript")
+  script(src="public/js/script.js" type="text/javascript")

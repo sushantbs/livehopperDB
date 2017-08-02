@@ -1,0 +1,67 @@
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Courier'
+}
+
+body {
+  padding: 10px;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.toaster {
+  display: inline-block;
+  position: fixed;
+  top: 100px;
+  left: 0;
+  right: 0;
+  opacity: 0.8;
+  color: #fff;
+  text-align: center;
+}
+
+.toaster > div {
+  display: inline-block;
+  padding: 10px 5px;
+}
+
+.toaster .error {
+  background-color: red;
+}
+
+.toaster .info {
+  background-color: green;
+}
+
+.row-element {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px;
+}
+
+.row-element > div {
+  padding: 10px;
+  background-color: #d3d3d3;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.row-element > div div {
+  padding: 5px 0;
+}
+
+
+.row-element label {
+  width: 90px;
+  display: inline-block;
+}
+
+
+.row-element input[type="button"] {
+  float: right;
+}
