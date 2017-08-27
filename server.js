@@ -60,8 +60,7 @@ app.use(function(err, req, res, next) {
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || '5000');
-var ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var port = normalizePort(process.env.PORT || 5000);
 app.set('port', port);
 
 // TODO: Check if the ne04j daemon is running and start it if not already running.
@@ -84,7 +83,7 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 console.log('Attempting to add socket listener to port ', port);
-server.listen(port, ip);
+server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
