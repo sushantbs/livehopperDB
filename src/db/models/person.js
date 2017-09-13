@@ -1,174 +1,183 @@
-var db = require('../index');
-var moment = require('moment');
+//const db = require('../index').dbHandle;
+const executeQuery = require('../index').executeQuery;
+const moment = require('moment');
 
 class Person {
-
-  /**
+	/**
    * TODO: Phone number should be used and should be used as a primary key.
    */
-  constructor (options) {
-    if (!options) {
-      options = {};
-    }
+	constructor(options) {
+		if (!options) {
+			options = {};
+		}
 
-    this.name = options.name;
-    this.emailId = options.emailId;
-    this.age = options.age;
-    this.gender = options.gender;
-    this.phoneNumber = options.phoneNumber;
+		this.name = options.name;
+		this.email = options.email;
+		this.age = options.age;
+		this.gender = options.gender;
+		this.phoneNumber = options.phoneNumber;
 
-    this.socialId = options.socialId;
-    this.baseLocation = options.baseLocation;
+		this.socialId = options.socialId;
+		this.baseLocation = options.baseLocation;
 
-    this.id = options.id;
-  }
+		this.id = options.id;
+	}
 
-  persist () {
+	async readByEmail() {}
 
-  }
+	async like(entityId) {
+		const nowTime = moment().valueOf();
+		const props = { createdAt: nowTime, updatedAt: nowTime };
+		const query = `MATCH (person:Person), (entity)
+			WHERE ID(person) = ${this.id} AND ID(entity) = ${entityId}
+			CREATE UNIQUE (person)-[like:LIKE {props}]->(entity)
+			RETURN like`;
 
-  like (entityId, callback) {
-    var query = [
-      'MATCH (person:Person), (entity) WHERE ID(person) = ' + this.id + ' AND ID(entity) = ' + entityId,
-      'CREATE UNIQUE (person)-[like:LIKE {props}]->(entity)',
-      'RETURN like'
-    ].join('\n');
+		return await executeQuery({ query, params: { props } });
+	}
 
-    let nowTime = moment().valueOf(),
-      props = {createdAt: nowTime, updatedAt: nowTime};
+	async attend(gigId) {
+		const query = `MATCH (person:Person), (gig:Gig)
+			WHERE ID(person) = ${this.id} AND ID(gig) = ${gigId}
+			CREATE UNIQUE (person)-[attend:ATTEND {props}]->(gig)
+			RETURN attend`;
+		const nowTime = moment().valueOf();
+		const props = { createdAt: nowTime, updatedAt: nowTime };
 
-    db.cypher({
-      query: query,
-      params: {props}
-    }, (err, results) => {
-      if (err) {
-        return callback(err);
-      }
+		return await executeQuery({ query, params: { props } });
+	}
 
-      console.log(results);
-      callback(null, results);
-    });
-  }
+	async follow(personId) {
+		const query = `MATCH (person:Person), (toFollow:Person)
+		WHERE ID(person) = ${this.id} AND ID(toFollow) = ${personId}
+		CREATE UNIQUE (person)-[follow:FOLLOW {props}]->(toFollow)
+		RETURN follow`;
 
-  attend (gigId, callback) {
-    var query = [
-      'MATCH (person:Person), (gig:Gig) WHERE ID(person) = ' + this.id + ' AND ID(gig) = ' + gigId,
-      'CREATE UNIQUE (person)-[attend:ATTEND {props}]->(gig)',
-      'RETURN attend'
-    ].join('\n');
+		const nowTime = moment().valueOf();
+		const props = { createdAt: nowTime, updatedAt: nowTime };
 
-    let nowTime = moment().valueOf(),
-      props = {createdAt: nowTime, updatedAt: nowTime};
+		return await executeQuery({ query, params: { props } });
+	}
 
-    db.cypher({
-      query: query,
-      params: {props}
-    }, (err, results) => {
-      if (err) {
-        return callback(err);
-      }
+	async getFollowers() {
+		const query = `MATCH (person:Person)-[:FOLLOW]->(me:Person)
+		WHERE ID(me) = ${this.id}
+		RETURN person`;
 
-      console.log(results);
-      callback(null, results);
-    });
-  }
+		return await executeQuery({ query });
+	}
 
-  getLinkedArtists (callback) {
+	async getFollowing() {
+		const query = `MATCH (me:Person)-[:FOLLOW]->(person:Person)
+		WHERE ID(me) = ${this.id}
+		RETURN person`;
 
-    var query = [
-      'MATCH (p:Person)-[:ATTEND]->(gig:Gig)<-[:PERFORM]-(artist:Artist) WHERE ID(p) = ' + this.id,
-      'RETURN artist,gig'
-    ].join('\n');
+		return await executeQuery({ query });
+	}
 
-    db.cypher({
-      query: query
-    }, (err, results) => {
-      if (err) {
-        return callback(err);
-      }
+	async getFullGigList() {
+		const query = `MATCH (me:Person)-[:ATTEND]->(gig:Gig)
+		WHERE ID(me) = ${this.id}
+		RETURN gig`;
 
-      console.log(JSON.stringify(results, null, 2));
-      callback(null, results);
-    });
-  }
+		return await executeQuery({ query });
+	}
 
-  getFeedList (callback) {
-    var query = [
-      'MATCH (me)-[:LIKE]->(actor)-[relation:HOSTING|PERFORM]->(gig) WHERE id(me) = ' + this.id,
-      'RETURN actor,relation,gig',
-      'UNION',
-      'MATCH (actor)-[relation:ATTEND]->(gig) WHERE id(actor) = ' + this.id,
-      'RETURN actor,relation,gig'
-    ].join('\n');
+	async getUpcomingGigList() {
+		let now = moment().valueOf();
+		const query = `MATCH (me:Person)-[:ATTEND]->(gig:Gig)
+		WHERE ID(me) = ${this.id} AND gig.startTime >= ${now}
+		RETURN gig`;
 
-    console.log(query);
+		return await executeQuery({ query });
+	}
 
-    db.cypher({
-      query: query
-    }, (err, results) => {
-      if (err) {
-        return callback(err);
-      }
+	async getPastGigList() {
+		let now = moment().valueOf();
+		const query = `MATCH (me:Person)-[:ATTEND]->(gig:Gig)
+		WHERE ID(me) = ${this.id} AND gig.startTime < ${now}
+		RETURN gig`;
 
-      console.log(JSON.stringify(results, null, 2));
-      callback(null, results);
-    });
-  }
+		return await executeQuery({ query });
+	}
+
+	async getLikedArtists() {
+		const query = `MATCH (me:Person)-[:LIKE]->(artist:Artist)
+		WHERE ID(me) = ${this.id}
+		RETURN artist`;
+
+		return await executeQuery({ query });
+	}
+
+	async getLikedHosts() {
+		const query = `MATCH (me:Person)-[:LIKE]->(host:Host)
+		WHERE ID(me) = ${this.id}
+		RETURN host`;
+
+		return await executeQuery({ query });
+	}
+
+	async search() {}
+
+	async getSearchHistory() {}
+
+	async getLinkedArtists() {
+		const query = `MATCH (p:Person)-[:ATTEND]->(gig:Gig)<-[:PERFORM]-(artist:Artist)
+			WHERE ID(p) = ${this.id}
+			RETURN artist,gig`;
+
+		return await executeQuery({ query });
+	}
+
+	async getLinkedHosts() {
+		const query = `MATCH (p:Person)-[:ATTEND]->(gig:Gig)<-[:HOSTING]-(host:Host)
+			WHERE ID(p) = ${this.id}
+			RETURN host,gig`;
+
+		return await executeQuery({ query });
+	}
+
+	async getFeedList() {
+		const query = `MATCH (me)-[:LIKE]->(actor)-[relation:HOSTING|PERFORM]->(gig)
+			WHERE id(me) = ${this.id}
+			RETURN actor,relation,gig
+			UNION
+			MATCH (actor)-[relation:ATTEND]->(gig) WHERE id(actor) = ${this.id}
+			RETURN actor,relation,gig`;
+
+		return await executeQuery({ query });
+	}
 }
 
-Person.create = (props, callback) => {
+Person.create = async props => {
+	const query = `CREATE (person:Person {props}) RETURN person`;
+	const nowTime = moment().valueOf();
 
-  var query = [
-    'CREATE (person:Person {props})',
-    'RETURN person'
-  ].join('\n');
-
-  let nowTime = moment().valueOf();
-  props = Object.assign({}, props, {createdAt: nowTime, updatedAt: nowTime});
-
-  db.cypher({
-    query: query,
-    params: {props},
-  }, (err, results) => {
-    if (err) {
-      return callback(err);
-    }
-
-    console.log(results);
-    callback(null, results);
-  });
+	props = Object.assign({}, props, { createdAt: nowTime, updatedAt: nowTime });
+	return await executeQuery({ query, params: { props } });
 };
 
-Person.get = (props, callback) => {
-  console.log(props);
-  var query = 'MATCH (person:Person {emailId: {emailId}}) RETURN person';
-  db.cypher({query, params: props}, callback);
-}
+Person.get = async props => {
+	const query = `MATCH (person:Person {email: {email}}) RETURN person`;
+	return await executeQuery({ query, params: { props } });
+};
 
-Person.getAll = (callback) => {
-  var query = [
-    'MATCH (person:Person) RETURN person'
-  ].join('\n');
+Person.getAll = async () => {
+	const query = `MATCH (person:Person) RETURN person`;
+	let results = await executeQuery({ query });
+	return results;
+};
 
-  db.cypher({query}, (err, results) => {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, results);
-  });
-}
-
-db.createConstraint({label: 'Person', property: 'emailId'}, (err, result) => {
-  console.log('Final Constraint result: ', err, result);
-});
+// db.createConstraint({ label: 'Person', property: 'email' }, (err, result) => {
+// 	console.log('Final Constraint result: ', err, result);
+// });
 
 /**
  * Relationships:
- *  - Follows (an artist)
- *  - Likes (a location)
- *  - Buddy (a person)
- *  - Prefers (a cuisine or a genre)
+ *  - Follows (artist)
+ *  - Likes (location)
+ *  - Buddy (person)
+ *  - Prefers (genre)
  *  - Attend(ing/ed) (an event)
  */
 

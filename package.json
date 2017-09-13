@@ -1,31 +1,34 @@
 {
-  "name": "livehopperdb",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "dependencies": {
-    "async": "^1.5.2",
-    "body-parser": "^1.12.4",
-    "client-sessions": "^0.7.0",
-    "cookie-parser": "^1.3.5",
-    "crypto": "0.0.3",
-    "csrf": "^3.0.3",
-    "debug": "^2.2.0",
-    "domready": "^1.0.8",
-    "errorhandler": "^1.4.3",
-    "es6-promise": "^3.2.1",
-    "express": "^4.14.0",
-    "jade": "^1.9.2",
-    "lodash": "^4.17.3",
-    "moment": "^2.17.1",
-    "neo4j": "^2.0.0-RC2",
-    "ps-node": "^0.1.4"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "author": "Sushant Badangod <sushant.bs@gmail.com>",
-  "license": "ISC"
+	"name": "livehopperdb",
+	"version": "1.0.0",
+	"description": "",
+	"main": "server.js",
+	"dependencies": {
+		"async": "^1.5.2",
+		"body-parser": "^1.12.4",
+		"client-sessions": "^0.7.0",
+		"cookie-parser": "^1.3.5",
+		"crypto": "0.0.3",
+		"csrf": "^3.0.3",
+		"debug": "^2.2.0",
+		"domready": "^1.0.8",
+		"errorhandler": "^1.4.3",
+		"es6-promise": "^3.2.1",
+		"express": "^4.14.0",
+		"jade": "^1.9.2",
+		"lodash": "^4.17.3",
+		"moment": "^2.17.1",
+		"neo4j-driver": "^1.4.0",
+		"ps-node": "^0.1.4"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node server.js"
+	},
+	"engine": {
+		"node": ">=8.3.0"
+	},
+	"author": "Sushant Badangod <sushant.bs@gmail.com>",
+	"license": "ISC"
 }
