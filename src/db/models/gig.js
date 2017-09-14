@@ -1,67 +1,108 @@
-var db = require('../index'),
-  moment = require('moment');
+var executeQuery = require("../index").executeQuery,
+    moment = require("moment");
 
 class Gig {
-  constructor (options) {
-    this.id = options.id || null;
-    this.name = options.name || null;
-    this.date = options.date || null;
-    this.startTime = options.startTime || null;
-    this.durations = options.duration || null;
+    constructor(options) {
+        this.id = options.id || null;
+        this.name = options.name || null;
+        this.date = options.date || null;
+        this.startTime = options.startTime || null;
+        this.durations = options.duration || null;
 
-    this.ratings = this.ratings || null;
-    this.schedule = this.schedule || null;
-
-    // if (this.id) {
-    //   db.cypher('MATCH g:Gig ')
-    // } else {
-    //
-    // }
-  }
-}
-
-Gig.prototype.read = () => {
-
-}
-
-Gig.create = (props, callback) => {
-
-  var query = [
-    'CREATE (gig:Gig {props})',
-    ((props.hostId) ? 'WITH gig MATCH (host:Host) WHERE id(host) = ' + props.hostId + ' CREATE UNIQUE (host)-[hosting:HOSTING]->(gig)' : ''),
-    'RETURN gig,hosting'
-  ].join('\n');
-
-  let nowTime = moment().valueOf(),
-    hostId = {props};
-
-  props = Object.assign({}, props, {createdAt: nowTime, updatedAt: nowTime});
-
-  db.cypher({
-    query: query,
-    params: {props, }
-  }, (err, results) => {
-    if (err) {
-      return callback(err);
+        this.ratings = this.ratings || null;
+        this.schedule = this.schedule || null;
     }
+}
 
-    console.log(results);
-    callback(null, results);
-  });
+Gig.prototype.getDetails = async () => {
+    const query = `MATCH (gig:Gig) WHERE ID(gig) = ${this.id} RETURN gig`;
+
+    return await executeQuery({ query });
 };
 
-Gig.getAll = (callback) => {
-  var query = [
-    'MATCH (gig:Gig) RETURN gig'
-  ].join('\n');
+Gig.prototype.getAttendees = async () => {
+    const query = `MATCH (gig:Gig)<-[:ATTEND]-(attends:Person) 
+    WHERE ID(gig) = ${this.id} 
+    RETURN attends`;
 
-  db.cypher({query}, (err, results) => {
-    if (err) {
-      return callback(err);
+    return await executeQuery({ query });
+};
+
+Gig.prototype.getArtists = async () => {
+    const query = `MATCH (gig:Gig)<-[:PERFORM]-(artist:Artist) 
+    WHERE ID(gig) = ${this.id} 
+    RETURN artist`;
+
+    return await executeQuery({ query });
+};
+
+Gig.prototype.getHosts = async () => {
+    const query = `MATCH (gig:Gig)<-[:HOSTING]-(host:Host) 
+    WHERE ID(gig) = ${this.id} 
+    RETURN host`;
+
+    return await executeQuery({ query });
+};
+
+Gig.prototype.rate = async () => {};
+
+Gig.prototype.getRating = async () => {};
+
+Gig.prototype.addHost = async hostId => {
+    const query = `MATCH (gig:Gig), (host:Host) 
+    WHERE ID(gig) = ${this.id} AND ID(host) = ${hostId}
+    CREATE UNIQUE (host)-[hosting:HOSTING {props}]->(gig)
+    RETURN hosting`;
+
+    const nowTime = moment().valueOf();
+    const props = { createdAt: nowTime, updatedAt: nowTime };
+
+    return await executeQuery({ query, params: { props } });
+};
+
+Gig.prototype.addArtist = async artistId => {
+    const query = `MATCH (gig:Gig), (artist:Artist) 
+    WHERE ID(gig) = ${this.id} AND ID(artist) = ${artistId}
+    CREATE UNIQUE (artist)-[perform:PERFORM {props}]->(gig)
+    RETURN perform`;
+
+    const nowTime = moment().valueOf();
+    const props = { createdAt: nowTime, updatedAt: nowTime };
+
+    return await executeQuery({ query, params: { props } });
+};
+
+Gig.create = async props => {
+    if (!props.creatorHostId && !host.creatorArtistId) {
+        return Promise.reject(new Error(`Creator Id not provided`));
     }
 
-    callback(null, results);
-  });
-}
+    let creationConstraint = props.creatorHostId
+        ? `WITH gig MATCH (host:Host) 
+			WHERE id(host) = ${props.creatorHostId} 
+			CREATE UNIQUE (host)-[hosting:HOSTING]->(gig)`
+        : `WITH gig MATCH (artist:Artist) 
+			WHERE id(host) = ${props.creatorArtistId} 
+			CREATE UNIQUE (artist)-[perform:PERFORM]->(gig)`;
+
+    let nowTime = moment().valueOf(),
+        hostId = { props };
+
+    const query = `CREATE (gig:Gig {props})
+		${creationConstraint}
+		RETURN gig,hosting`;
+
+    props = Object.assign({}, props, {
+        createdAt: nowTime,
+        updatedAt: nowTime
+    });
+
+    return await executeQuery({ query, params: { props } });
+};
+
+Gig.getAll = async () => {
+    var query = `MATCH (gig:Gig) RETURN gig`;
+    return await executeQuery({ query });
+};
 
 module.exports = Gig;

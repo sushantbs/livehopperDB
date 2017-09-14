@@ -1,9 +1,10 @@
 let express = require('express');
 let router = express.Router();
 let personRouteHandler = require('./person');
+let gigRouteHandler = require('./gig');
 
 router.use('/api/user', personRouteHandler);
-// router.use('/api/gig', gigRouteHandler);
+router.use('/api/gig', gigRouteHandler);
 // router.use('/api/artist', artistRouteHandler);
 // router.use('/api/host', hostRouteHandler);
 
@@ -16,7 +17,5 @@ router.get('/', (req, res, next) => {
 		title: 'GrassHopper Data Viewer'
 	});
 });
-
-console.log('routes added');
 
 module.exports = router;
