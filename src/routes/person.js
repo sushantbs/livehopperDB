@@ -10,8 +10,8 @@ var Person = require('../db/models/person');
  * Get user profile
  * req.query.email {String} email of the user
  */
-router.get('/', (req, res, next) => {
-	var email = req.query.email;
+router.get('/details', (req, res, next) => {
+	var email = req.body.email;
 	console.log('get profile for: ', email);
 
 	if (!email) {
