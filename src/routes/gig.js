@@ -12,7 +12,7 @@ var Gig = require("../db/models/gig");
  * @type {[type]}
  */
 router.get("/details", (req, res, next) => {
-    let id = req.body.gigId;
+    let id = req.query.gigId;
     console.log("get gig");
 
     if (!id) {
@@ -96,7 +96,7 @@ router.put("/update", (req, res, next) => {
 });
 
 router.get("/getAttendees", (req, res, next) => {
-    let gigId = req.body.gigId;
+    let gigId = req.query.gigId;
 
     if (!id) {
         return res.status(400).send(`Gig Id not found in the request body`);
@@ -115,7 +115,7 @@ router.get("/getAttendees", (req, res, next) => {
 });
 
 router.get("/getInterested", (req, res, next) => {
-    let gigId = req.body.gigId;
+    let gigId = req.query.gigId;
 
     if (!id) {
         return res.status(400).send(`Gig Id not found in the request body`);
@@ -134,7 +134,7 @@ router.get("/getInterested", (req, res, next) => {
 });
 
 router.get("/getArtists", (req, res, next) => {
-    let gigId = req.body.gigId;
+    let gigId = req.query.gigId;
 
     if (!id) {
         return res.status(400).send(`Gig Id not found in the request body`);
@@ -177,3 +177,5 @@ router.get("/getHosts", (req, res, next) => {
 router.delete("/remove", (req, res, next) => {
     res.send("ok");
 });
+
+module.exports = router;

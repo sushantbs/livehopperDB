@@ -154,16 +154,22 @@ Person.create = async props => {
     const query = `CREATE (person:Person {props}) RETURN person`;
     const nowTime = moment().valueOf();
 
+    if (!props.email) {
+        console.log("CREATE ERROR: Email of the person not available");
+        return null;
+    }
+
     props = Object.assign({}, props, {
         createdAt: nowTime,
         updatedAt: nowTime
     });
+
     return await executeQuery({ query, params: { props } });
 };
 
 Person.get = async props => {
     const query = `MATCH (person:Person {email: {email}}) RETURN person`;
-    return await executeQuery({ query, params: { props } });
+    return await executeQuery({ query, params: props });
 };
 
 Person.getAll = async () => {
