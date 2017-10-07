@@ -1,73 +1,46 @@
-var Person = require('./person');
-var db = require('../index');
-var moment = require('moment');
+var Person = require("./person");
+var executeQuery = require("../index").executeQuery;
+var moment = require("moment");
 
 class Host extends Person {
+    constructor(options) {
+        super(options);
+        this.city = options.city || null;
+    }
 
-  constructor (options) {
-    super(options);
-    this.city = options.city || null;
-  }
+    async hosting(gigId) {
+        const query = `MATCH (host:Host), (gig:Gig) 
+          WHERE ID(host) = ${this.id} AND ID(gig) = ${gigId}
+          CREATE UNIQUE (host)-[hosting:HOSTING {props}}]->(gig)
+          RETURN hosting`;
 
-  hosting (gigId, callback) {
-    var query = [
-      'MATCH (host:Host), (gig:Gig) WHERE ID(host) = ' + this.id + ' AND ID(gig) = ' + gigId,
-      'CREATE UNIQUE (host)-[hosting:HOSTING {props}}]->(gig)',
-      'RETURN hosting'
-    ].join('\n');
+        let nowTime = moment().valueOf();
+        return await executeQuery({
+            query,
+            params: { props: { updatedAt: nowTime, createdAt: nowTime } }
+        });
+    }
+}
+
+Host.create = async props => {
+    const query = `CREATE (host:Person:Host {props}) RETURN host`;
 
     let nowTime = moment().valueOf();
-    db.cypher({
-      query: query,
-      params: {props: {updatedAt: nowTime, createdAt: nowTime}}
-    }, (err, results) => {
-      if (err) {
-        return callback(err);
-      }
-
-      console.log(results);
-      callback(null, results);
+    props = Object.assign({}, props, {
+        createdAt: nowTime,
+        updatedAt: nowTime
     });
-  }
-}
 
-Host.create = (props, callback) => {
-
-  var query = [
-    'CREATE (host:Person:Host {props})',
-    'RETURN host'
-  ].join('\n');
-
-  let nowTime = moment().valueOf();
-  props = Object.assign({}, props, {createdAt: nowTime, updatedAt: nowTime});
-
-  db.cypher({
-    query: query,
-    params: {props},
-  }, (err, results) => {
-    if (err) {
-      return callback(err);
-    }
-
-    console.log(results);
-    callback(null, results);
-  });
+    return await executeQuery({
+        query,
+        params: { props }
+    });
 };
 
-Host.getAll = (callback) => {
-  var query = [
-    'MATCH (host:Host) RETURN host'
-  ].join('\n');
-
-  db.cypher({query}, (err, results) => {
-    if (err) {
-      return callback(err);
-    }
-
-    callback(null, results);
-  });
-}
-
+Host.getAll = async () => {
+    var query = `MATCH (host:Host) RETURN host`;
+    return await executeQuery({ query });
+};
 
 /**
  * Relationships

@@ -4,8 +4,8 @@ const moment = require("moment");
 
 class Person {
     /**
-   * TODO: Phone number should be used and should be used as a primary key.
-   */
+     * TODO: Phone number should be used and should be used as a primary key.
+     */
     constructor(options) {
         if (!options) {
             options = {};
@@ -33,7 +33,7 @@ class Person {
 			CREATE UNIQUE (person)-[like:LIKE {props}]->(entity)
 			RETURN like`;
 
-        return await executeQuery({ query, params: { props } });
+        await executeQuery({ query, params: { props } });
     }
 
     async attend(gigId) {
@@ -112,10 +112,34 @@ class Person {
 
     async getLikedHosts() {
         const query = `MATCH (me:Person)-[:LIKE]->(host:Host)
-		WHERE ID(me) = ${this.id}
-		RETURN host`;
+            WHERE ID(me) = ${this.id}
+            RETURN host`;
 
         return await executeQuery({ query });
+    }
+
+    async getPreferences() {
+        const query = `MATCH (me:Person)-[p:PREFERS]->(c) 
+            WHERE ID(me) = ${this.id}
+            RETURN p`;
+
+        return await executeQuery({ query });
+    }
+
+    async setPreferences(preferences) {
+        const query = `MATCH (me:Person)-[p:PREFERS]->(c:Category) 
+            WHERE ID(me) = ${this.id}
+            DELETE p
+            ${prefernces.map(
+                (pref, index) =>
+                    `CREATE UNIQUE (me)-[p${index}:PREFERS {props}]->(c${index}:Category) WHERE ID(c${index}) = ${prefId}`
+            )}
+            RETURN me`;
+
+        const nowTime = moment().valueOf();
+
+        let props = { preferences, updatedAt: nowTime };
+        return await executeQuery({ query, params: { props } });
     }
 
     async search() {}
@@ -174,8 +198,7 @@ Person.get = async props => {
 
 Person.getAll = async () => {
     const query = `MATCH (person:Person) RETURN person`;
-    let results = await executeQuery({ query });
-    return results;
+    return await executeQuery({ query });
 };
 
 // db.createConstraint({ label: 'Person', property: 'email' }, (err, result) => {

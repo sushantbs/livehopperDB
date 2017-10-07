@@ -10,7 +10,7 @@ var Person = require("../db/models/person");
  * Get user profile
  * req.query.email {String} email of the user
  */
-router.get("/details", (req, res, next) => {
+router.get("/details", async (req, res, next) => {
     var email = req.query.email;
     console.log(`get profile for: ${email}`);
 
@@ -19,13 +19,12 @@ router.get("/details", (req, res, next) => {
         return;
     }
 
-    Person.get({ email })
-        .then(response => {
-            res.send(response);
-        })
-        .catch(err => {
-            return res.status(500).send(err);
-        });
+    try {
+        let response = await Person.get({ email });
+        res.send(response);
+    } catch (err) {
+        return res.status(500).send(err);
+    }
 });
 
 /**
@@ -232,6 +231,35 @@ router.post("/interested", (req, res, next) => {
     console.log(`user ${id} IS ATTENDING gig ${gigId}`);
     new Person({ id })
         .interested(gigId)
+        .then(response => {
+            res.send(response);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+});
+
+router.get("/preferences/:personId", (req, res, next) => {
+    let id = req.params.personId;
+
+    console.log(`get preferences for user ${id}`);
+    new Person({ id })
+        .getPreferences()
+        .then(response => {
+            res.send(response);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+});
+
+router.put("/preferences", (req, res, next) => {
+    let id = req.body.personId,
+        pref = req.body.preferences;
+
+    console.log(`adding preferences for user ${id}: ${pref}`);
+    new Person({ id })
+        .setPreferences(pref)
         .then(response => {
             res.send(response);
         })

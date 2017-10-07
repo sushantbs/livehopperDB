@@ -18,14 +18,23 @@ const driver = neo4j.driver(
 
 //module.exports.dbHandle = db;
 
+let _convertQueryResultToObject = record => {
+    let jsonRecord = record.toObject();
+    jsonRecord[record.keys[0]]._id = jsonRecord[
+        record.keys[0]
+    ].identity.toString();
+    return jsonRecord;
+};
+
 module.exports.executeQuery = queryObj => {
     let session = driver.session();
     return session
         .run(queryObj.query, queryObj.params)
         .then(results => {
             session.close();
-            console.log(results);
-            return results.records;
+            return results.records.map(record =>
+                _convertQueryResultToObject(record)
+            );
         })
         .catch(err => console.log(`DB ERROR: ${err}`));
 };
