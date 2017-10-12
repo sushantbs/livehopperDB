@@ -20,10 +20,11 @@ const driver = neo4j.driver(
 
 let _convertQueryResultToObject = record => {
     let jsonRecord = record.toObject();
-    jsonRecord[record.keys[0]]._id = jsonRecord[
-        record.keys[0]
-    ].identity.toString();
-    return jsonRecord;
+    let objectKey = record.keys[0];
+    let returnObject = Object.assign({}, jsonRecord[objectKey].properties);
+
+    returnObject._id = jsonRecord[objectKey].identity.toString();
+    return returnObject;
 };
 
 module.exports.executeQuery = queryObj => {

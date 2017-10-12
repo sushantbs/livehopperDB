@@ -170,19 +170,17 @@ router.get("/searchhistory", (req, res, next) => {
 /**
  * Like a host
  */
-router.post("/likehost", (req, res, next) => {
+router.post("/likehost", async (req, res, next) => {
     let id = req.body.personId,
         hostId = req.body.hostId;
 
     console.log(`user ${id} likes host ${hostId}`);
-    new Person({ id })
-        .like(hostId)
-        .then(response => {
-            res.send(response);
-        })
-        .err(err => {
-            res.status(500).send(err);
-        });
+    try {
+        let response = await new Person({ id }).like(hostId);
+        res.send(response);
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 /**

@@ -30,7 +30,9 @@ class Person {
         const props = { createdAt: nowTime, updatedAt: nowTime };
         const query = `MATCH (person:Person), (entity)
 			WHERE ID(person) = ${this.id} AND ID(entity) = ${entityId}
-			CREATE UNIQUE (person)-[like:LIKE {props}]->(entity)
+            CREATE UNIQUE (person)-[like:LIKE]->(entity)
+            WITH like
+            SET like += {props}
 			RETURN like`;
 
         await executeQuery({ query, params: { props } });
@@ -39,7 +41,9 @@ class Person {
     async attend(gigId) {
         const query = `MATCH (person:Person), (gig:Gig)
 			WHERE ID(person) = ${this.id} AND ID(gig) = ${gigId}
-			CREATE UNIQUE (person)-[attend:ATTEND {props}]->(gig)
+            CREATE UNIQUE (person)-[attend:ATTEND]->(gig)
+            WITH attend
+            SET attend += {props}
 			RETURN attend`;
 
         const nowTime = moment().valueOf();
@@ -51,8 +55,10 @@ class Person {
     async follow(personId) {
         const query = `MATCH (person:Person), (toFollow:Person)
 		WHERE ID(person) = ${this.id} AND ID(toFollow) = ${personId}
-		CREATE UNIQUE (person)-[follow:FOLLOW {props}]->(toFollow)
-		RETURN follow`;
+		CREATE UNIQUE (person)-[follow:FOLLOW]->(toFollow)
+        WITH follow
+        SET follow += {props}
+        RETURN follow`;
 
         const nowTime = moment().valueOf();
         const props = { createdAt: nowTime, updatedAt: nowTime };
@@ -121,25 +127,26 @@ class Person {
     async getPreferences() {
         const query = `MATCH (me:Person)-[p:PREFERS]->(c) 
             WHERE ID(me) = ${this.id}
-            RETURN p`;
+            RETURN c`;
 
         return await executeQuery({ query });
     }
 
     async setPreferences(preferences) {
-        const query = `MATCH (me:Person)-[p:PREFERS]->(c:Category) 
+        const query = `MATCH (me:Person)
             WHERE ID(me) = ${this.id}
-            DELETE p
-            ${prefernces.map(
-                (pref, index) =>
-                    `CREATE UNIQUE (me)-[p${index}:PREFERS {props}]->(c${index}:Category) WHERE ID(c${index}) = ${prefId}`
-            )}
-            RETURN me`;
+            OPTIONAL MATCH (me)-[p:PREFERS]->(c) 
+            DELETE p            
+            WITH me
+            OPTIONAL MATCH (cn:Category)
+            WHERE cn.name IN {preferences}
+            MERGE (me)-[p:PREFERS {updatedAt: {props}.updatedAt}]->(cn)
+            RETURN DISTINCT(cn)`;
 
         const nowTime = moment().valueOf();
 
-        let props = { preferences, updatedAt: nowTime };
-        return await executeQuery({ query, params: { props } });
+        let props = { updatedAt: nowTime };
+        return await executeQuery({ query, params: { props, preferences } });
     }
 
     async search() {}

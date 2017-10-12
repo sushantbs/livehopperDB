@@ -33,7 +33,7 @@ $(function() {
             data: {
                 name: $("#add-user-name").val(),
                 age: $("#add-user-age").val(),
-                emailId: $("#add-user-email").val()
+                email: $("#add-user-email").val()
             },
             success: data => {
                 renderUsers(data);
@@ -210,7 +210,6 @@ $(function() {
             success: result => {
                 showToaster("Fetched feed successfully");
                 var feedItems = {};
-                debugger;
                 $.each(result, (index, item) => {});
 
                 feedItems = Object.values(feedItems);
@@ -237,17 +236,17 @@ $(function() {
             userFeedDropdown = $("#users-feed");
 
         $.each(personList, (i, item) => {
-            var person = item.person.properties;
+            var person = item;
 
             var userElement = $("<div>");
             userElement.html(
-                [person.emailId, person.name, person.age].join("; ")
+                [person.email, person.name, person.age].join("; ")
             );
             userListContainer.append(userElement);
 
             var userOption = $("<option>")
-                .attr({ value: item.person._id })
-                .text(person.emailId);
+                .attr({ value: person._id })
+                .text(person.email);
             userAttendingDropdown.append(userOption.clone());
             userLikesHostDropdown.append(userOption.clone());
             userLikesArtistDropdown.append(userOption.clone());
@@ -262,14 +261,14 @@ $(function() {
             eventHostSelect = $("#event-host-list");
 
         $.each(hostList, (i, item) => {
-            var host = item.host.properties;
+            var host = item;
 
             var element = $("<div>");
             element.html([host.name, host.email, host.phone].join("; "));
             listContainer.append(element);
 
             var hostOption = $("<option>")
-                .attr({ value: item.host._id })
+                .attr({ value: host._id })
                 .text(host.name);
             eventHostSelect.append(hostOption.clone());
             likesDropdown.append(hostOption);
@@ -282,14 +281,14 @@ $(function() {
             performingDropdown = $("#events-perform");
 
         $.each(gigsList, (i, item) => {
-            var gig = item.gig.properties;
+            var gig = item;
 
             var element = $("<div>");
             element.html([gig.name, gig.date, gig.time].join("; "));
             listContainer.append(element);
 
             var option = $("<option>")
-                .attr({ value: item.gig._id })
+                .attr({ value: gig._id })
                 .text(gig.name);
             attendingDropdown.append(option.clone());
             performingDropdown.append(option);
@@ -302,7 +301,7 @@ $(function() {
             dropdown = $("#artists-perform");
 
         $.each(artistList, (i, item) => {
-            var artist = item.artist.properties;
+            var artist = item;
 
             var userElement = $("<div>");
             userElement.html(
@@ -311,7 +310,7 @@ $(function() {
             listContainer.append(userElement);
 
             var userOption = $("<option>")
-                .attr({ value: item.artist._id })
+                .attr({ value: artist._id })
                 .text(artist.name);
             dropdown.append(userOption.clone());
             likesDropdown.append(userOption);
